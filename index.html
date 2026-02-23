@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic Tac Toe - Multiplayer</title>
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="frontend/style.css">
+  <!-- Socket.io client library -->
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <!-- Server URL configuration (override in production) -->
+  <script>
+    window.SERVER_URL = 'https://tic-tac-toe-kt1g.onrender.com';
+  </script>
+</head>
+<body>
+  <!-- Ambient glow effects -->
+  <div class="glow glow-1"></div>
+  <div class="glow glow-2"></div>
+  
+  <div class="container">
+    <h1 class="title">Tic Tac Toe</h1>
+    <p class="subtitle">Play with a friend</p>
+    
+    <!-- Menu Screen -->
+    <div id="menu-screen" class="screen">
+      <h2>Play Online</h2>
+      
+      <div class="menu-buttons">
+        <button id="create-room-btn" class="btn btn-primary">Create room</button>
+        <button id="join-room-btn" class="btn btn-secondary">Join room</button>
+      </div>
+      
+      <!-- Create Room Form -->
+      <div id="create-room-form" class="form hidden">
+        <h3>Create a New Room</h3>
+        <div class="form-group">
+          <label for="create-passkey">Pass Key (4-20 characters)</label>
+          <input type="password" id="create-passkey" placeholder="Enter a pass key" maxlength="20">
+        </div>
+        <div class="form-buttons">
+          <button id="create-back" class="btn btn-secondary">Back</button>
+          <button id="create-submit" class="btn btn-primary">Create</button>
+        </div>
+      </div>
+      
+      <!-- Join Room Form -->
+      <div id="join-room-form" class="form hidden">
+        <h3>Join a Room</h3>
+        <div class="form-group">
+          <label for="join-room-id">Room ID (6 characters)</label>
+          <input type="text" id="join-room-id" placeholder="Enter Room ID" maxlength="6">
+        </div>
+        <div class="form-group">
+          <label for="join-passkey">Pass Key</label>
+          <input type="password" id="join-passkey" placeholder="Enter pass key" maxlength="20">
+        </div>
+        <div class="form-buttons">
+          <button id="join-back" class="btn btn-secondary">Back</button>
+          <button id="join-submit" class="btn btn-primary">Join</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Lobby Screen -->
+    <div id="lobby-screen" class="screen hidden">
+      <h2>Room created</h2>
+      <p class="subtitle">Share with your opponent</p>
+      
+      <div class="room-info">
+        <div class="info-row">
+          <span class="label">Room ID:</span>
+          <span id="room-id-display" class="value"></span>
+          <button id="copy-room-id" class="btn btn-small">Copy</button>
+        </div>
+        <div class="info-row">
+          <span class="label">Pass Key:</span>
+          <span id="passkey-display" class="value"></span>
+          <button id="copy-passkey" class="btn btn-small">Copy</button>
+        </div>
+      </div>
+      
+      <p id="waiting-message" class="waiting">Waiting for opponent to join...</p>
+    </div>
+    
+    <!-- Game Screen -->
+    <div id="game-screen" class="screen hidden">
+      <div class="game-header">
+        <span id="role-indicator" class="role-indicator"></span>
+        <span id="turn-indicator" class="turn-indicator"></span>
+      </div>
+      
+      <div id="board" class="board">
+        <div class="cell" data-index="0"></div>
+        <div class="cell" data-index="1"></div>
+        <div class="cell" data-index="2"></div>
+        <div class="cell" data-index="3"></div>
+        <div class="cell" data-index="4"></div>
+        <div class="cell" data-index="5"></div>
+        <div class="cell" data-index="6"></div>
+        <div class="cell" data-index="7"></div>
+        <div class="cell" data-index="8"></div>
+      </div>
+      
+      <div id="result-message" class="result-message hidden"></div>
+      <div id="replay-votes" class="replay-votes hidden"></div>
+      
+      <div class="game-buttons">
+        <button id="replay-btn" class="btn btn-primary hidden">Play Again</button>
+        <button id="leave-btn" class="btn btn-secondary">Leave Room</button>
+      </div>
+    </div>
+    
+    <!-- Error Modal -->
+    <div id="error-modal" class="modal hidden">
+      <div class="modal-content">
+        <p id="error-message"></p>
+        <button id="error-close" class="btn btn-primary">OK</button>
+      </div>
+    </div>
+    
+    <!-- Snackbar for notifications -->
+    <div id="snackbar" class="snackbar"></div>
+    
+    <!-- Confetti container -->
+    <div id="confetti" class="confetti-container"></div>
+  </div>
+  
+  <!-- JavaScript files -->
+  <script src="frontend/js/game.js"></script>
+  <script src="frontend/js/socket.js"></script>
+  <script src="frontend/js/ui.js"></script>
+  <script src="frontend/js/main.js"></script>
+</body>
+</html>
