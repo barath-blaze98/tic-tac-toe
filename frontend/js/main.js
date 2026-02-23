@@ -7,6 +7,8 @@
 const gameState = {
   roomId: null,
   passKey: null,
+  playerName: null,
+  opponentName: null,
   role: null,
   board: Array(9).fill(null),
   turn: null,
@@ -152,21 +154,34 @@ function handleDisconnect() {
 
 function handleCreateRoom() {
   const elements = getElements();
+  const name = elements.createNameInput.value.trim();
   const passKey = elements.createPassKeyInput.value.trim();
+  
+  if (name.length < 1 || name.length > 20) {
+    showError('Name must be 1-20 characters');
+    return;
+  }
   
   if (passKey.length < 4 || passKey.length > 20) {
     showError('Pass key must be 4-20 characters');
     return;
   }
   
+  gameState.playerName = name;
   gameState.passKey = passKey;
-  createRoom(passKey);
+  createRoom(passKey, name);
 }
 
 function handleJoinRoom() {
   const elements = getElements();
+  const name = elements.joinNameInput.value.trim();
   const roomId = elements.joinRoomIdInput.value.trim().toUpperCase();
   const passKey = elements.joinPassKeyInput.value.trim();
+  
+  if (name.length < 1 || name.length > 20) {
+    showError('Name must be 1-20 characters');
+    return;
+  }
   
   if (roomId.length !== 6) {
     showError('Room ID must be 6 characters');
@@ -178,9 +193,10 @@ function handleJoinRoom() {
     return;
   }
   
+  gameState.playerName = name;
   gameState.roomId = roomId;
   gameState.passKey = passKey;
-  joinRoom(roomId, passKey);
+  joinRoom(roomId, passKey, name);
 }
 
 function handleRoomCreated(data) {
@@ -202,12 +218,13 @@ function handleGameStart(data) {
   gameState.role = data.role;
   gameState.status = 'playing';
   gameState.winner = null;
+  gameState.opponentName = data.opponentName || 'Opponent';
   
   // Update UI
   clearBoard();
   hideResult();
   renderBoard(gameState.board);
-  updateTurnIndicator(gameState.turn, gameState.role);
+  updateTurnIndicator(gameState.turn, gameState.role, gameState.opponentName);
   updateRoleIndicator(gameState.role);
   
   // Remove celebration class if present
@@ -222,6 +239,9 @@ function handleBoardUpdate(data) {
   gameState.board = data.board;
   gameState.turn = data.turn;
   gameState.winner = data.winner;
+  if (data.opponentName) {
+    gameState.opponentName = data.opponentName;
+  }
   
   // Update UI
   renderBoard(gameState.board);
@@ -241,7 +261,7 @@ function handleBoardUpdate(data) {
       }
     }
   } else {
-    updateTurnIndicator(gameState.turn, gameState.role);
+    updateTurnIndicator(gameState.turn, gameState.role, gameState.opponentName);
   }
 }
 
@@ -256,6 +276,7 @@ function handlePlayerLeft() {
   // Reset game state
   gameState.roomId = null;
   gameState.passKey = null;
+  gameState.playerName = null;
   gameState.role = null;
   gameState.board = Array(9).fill(null);
   gameState.turn = null;
@@ -312,6 +333,7 @@ function handleLeaveRoom() {
   // Reset game state
   gameState.roomId = null;
   gameState.passKey = null;
+  gameState.playerName = null;
   gameState.role = null;
   gameState.board = Array(9).fill(null);
   gameState.turn = null;

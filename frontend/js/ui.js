@@ -17,12 +17,14 @@ const elements = {
   
   // Create room form
   createRoomForm: null,
+  createNameInput: null,
   createPassKeyInput: null,
   createSubmitBtn: null,
   createBackBtn: null,
   
   // Join room form
   joinRoomForm: null,
+  joinNameInput: null,
   joinRoomIdInput: null,
   joinPassKeyInput: null,
   joinSubmitBtn: null,
@@ -66,12 +68,14 @@ function initElements() {
   
   // Create room form
   elements.createRoomForm = document.getElementById('create-room-form');
+  elements.createNameInput = document.getElementById('create-name');
   elements.createPassKeyInput = document.getElementById('create-passkey');
   elements.createSubmitBtn = document.getElementById('create-submit');
   elements.createBackBtn = document.getElementById('create-back');
   
   // Join room form
   elements.joinRoomForm = document.getElementById('join-room-form');
+  elements.joinNameInput = document.getElementById('join-name');
   elements.joinRoomIdInput = document.getElementById('join-room-id');
   elements.joinPassKeyInput = document.getElementById('join-passkey');
   elements.joinSubmitBtn = document.getElementById('join-submit');
@@ -139,7 +143,9 @@ function showJoinRoomForm() {
 function hideForms() {
   elements.createRoomForm.classList.add('hidden');
   elements.joinRoomForm.classList.add('hidden');
+  elements.createNameInput.value = '';
   elements.createPassKeyInput.value = '';
+  elements.joinNameInput.value = '';
   elements.joinRoomIdInput.value = '';
   elements.joinPassKeyInput.value = '';
 }
@@ -192,12 +198,14 @@ function highlightWinningCells(winningIndices) {
  * Update turn indicator
  * @param {string} turn - Current turn ("X" | "O")
  * @param {string} playerRole - The player's role ("X" | "O")
+ * @param {string} opponentName - The opponent's name (optional)
  */
-function updateTurnIndicator(turn, playerRole) {
+function updateTurnIndicator(turn, playerRole, opponentName) {
   const isYourTurn = turn === playerRole;
+  const displayName = opponentName ? `${opponentName}'s` : "Opponent's";
   elements.turnIndicator.textContent = isYourTurn 
     ? "Your turn!" 
-    : `Opponent's turn (${turn})`;
+    : `${displayName} turn (${turn})`;
   elements.turnIndicator.className = isYourTurn ? 'your-turn' : 'opponent-turn';
 }
 

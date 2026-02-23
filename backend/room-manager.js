@@ -26,9 +26,10 @@ function generateRoomId() {
  * Create a new room
  * @param {string} passKey - The pass key (4-20 chars)
  * @param {string} socketId - The socket ID of the creator
+ * @param {string} playerName - The player's name
  * @returns {Promise<string>} - The generated roomId
  */
-async function createRoom(passKey, socketId) {
+async function createRoom(passKey, socketId, playerName) {
   const roomId = generateRoomId();
   
   // Ensure uniqueness
@@ -41,7 +42,7 @@ async function createRoom(passKey, socketId) {
   const room = {
     roomId,
     passKeyHash,
-    players: [{ socketId, role: 'X' }], // Creator is always X
+    players: [{ socketId, role: 'X', name: playerName || 'Player X' }], // Creator is always X
     board: Array(9).fill(null),
     turn: 'X',
     status: 'waiting',
@@ -58,9 +59,10 @@ async function createRoom(passKey, socketId) {
  * @param {string} roomId - The room ID
  * @param {string} passKey - The pass key
  * @param {string} socketId - The socket ID of the joining player
+ * @param {string} playerName - The player's name
  * @returns {Promise<Object>} - { success: boolean, role?: string, error?: { code: string, message: string } }
  */
-async function joinRoom(roomId, passKey, socketId) {
+async function joinRoom(roomId, passKey, socketId, playerName) {
   const room = rooms.get(roomId);
 
   if (!room) {
@@ -108,7 +110,7 @@ async function joinRoom(roomId, passKey, socketId) {
 
   // Assign role
   const role = room.players.length === 0 ? 'X' : 'O';
-  room.players.push({ socketId, role });
+  room.players.push({ socketId, role, name: playerName || 'Player ' + role });
 
   // If room is now full, start the game
   if (room.players.length === 2) {

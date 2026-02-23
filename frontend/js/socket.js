@@ -98,26 +98,28 @@ function registerCallbacks(newCallbacks) {
 /**
  * Create a new room
  * @param {string} passKey - The pass key (4-20 chars)
+ * @param {string} playerName - The player's name
  */
-function createRoom(passKey) {
+function createRoom(passKey, playerName) {
   if (!socket) {
     console.error('Socket not initialized');
     return;
   }
-  socket.emit('create_room', { passKey });
+  socket.emit('create_room', { passKey, playerName });
 }
 
 /**
  * Join an existing room
  * @param {string} roomId - The room ID (6 chars)
  * @param {string} passKey - The pass key
+ * @param {string} playerName - The player's name
  */
-function joinRoom(roomId, passKey) {
+function joinRoom(roomId, passKey, playerName) {
   if (!socket) {
     console.error('Socket not initialized');
     return;
   }
-  socket.emit('join_room', { roomId, passKey });
+  socket.emit('join_room', { roomId, passKey, playerName });
 }
 
 /**

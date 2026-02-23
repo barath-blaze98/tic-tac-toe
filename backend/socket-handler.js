@@ -26,7 +26,16 @@ function initSocketHandlers(io) {
     // Handle create_room event
     socket.on('create_room', async (data) => {
       try {
-        const { passKey } = data;
+        const { passKey, playerName } = data;
+
+        // Validate playerName
+        if (!playerName || typeof playerName !== 'string' || playerName.length < 1 || playerName.length > 20) {
+          socket.emit('error', {
+            code: 'INVALID_NAME',
+            message: 'Name must be 1-20 characters'
+          });
+          return;
+        }
 
         // Validate passKey
         if (!passKey || typeof passKey !== 'string' || passKey.length < 4 || passKey.length > 20) {
@@ -37,7 +46,7 @@ function initSocketHandlers(io) {
           return;
         }
 
-        const roomId = await createRoom(passKey, socket.id);
+        const roomId = await createRoom(passKey, socket.id, playerName);
         
         // Creator also needs to join the socket room to receive game_start
         socket.join(roomId);
@@ -56,7 +65,16 @@ function initSocketHandlers(io) {
     // Handle join_room event
     socket.on('join_room', async (data) => {
       try {
-        const { roomId, passKey } = data;
+        const { roomId, passKey, playerName } = data;
+
+        // Validate playerName
+        if (!playerName || typeof playerName !== 'string' || playerName.length < 1 || playerName.length > 20) {
+          socket.emit('error', {
+            code: 'INVALID_NAME',
+            message: 'Name must be 1-20 characters'
+          });
+          return;
+        }
 
         // Validate inputs
         if (!roomId || typeof roomId !== 'string' || roomId.length !== 6) {
@@ -75,7 +93,7 @@ function initSocketHandlers(io) {
           return;
         }
 
-        const result = await joinRoom(roomId, passKey, socket.id);
+        const result = await joinRoom(roomId, passKey, socket.id, playerName);
 
         if (!result.success) {
           socket.emit('error', result.error);
@@ -89,22 +107,26 @@ function initSocketHandlers(io) {
 
         if (result.alreadyJoined) {
           // Player reconnected - send current game state
+          const opponent = room.players.find(p => p.socketId !== socket.id);
           socket.emit('game_start', {
             board: room.board,
             turn: room.turn,
-            role: result.role
+            role: result.role,
+            opponentName: opponent ? opponent.name : null
           });
           return;
         }
 
         // If game is ready to start (2 players), notify both
         if (room.status === 'playing') {
-          // Notify both players
+          // Notify both players with opponent's name
           room.players.forEach(player => {
+            const opponent = room.players.find(p => p.socketId !== player.socketId);
             io.to(player.socketId).emit('game_start', {
               board: room.board,
               turn: room.turn,
-              role: player.role
+              role: player.role,
+              opponentName: opponent ? opponent.name : null
             });
           });
           console.log(`Game started in room: ${roomId}`);
@@ -155,10 +177,13 @@ function initSocketHandlers(io) {
         }
 
         // Broadcast board update to both players
+        const room = getRoom(roomId);
+        const opponent = room ? room.players.find(p => p.socketId !== socket.id) : null;
         io.to(roomId).emit('board_update', {
           board: result.room.board,
           turn: result.room.turn,
-          winner: result.winner
+          winner: result.winner,
+          opponentName: opponent ? opponent.name : null
         });
 
         if (result.winner) {
@@ -201,10 +226,12 @@ function initSocketHandlers(io) {
           const room = resetRoom(roomId);
           if (room) {
             room.players.forEach(player => {
+              const opponent = room.players.find(p => p.socketId !== player.socketId);
               io.to(player.socketId).emit('game_start', {
                 board: room.board,
                 turn: room.turn,
-                role: player.role
+                role: player.role,
+                opponentName: opponent ? opponent.name : null
               });
             });
             console.log(`Game restarted in room: ${roomId}`);
